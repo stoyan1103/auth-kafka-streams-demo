@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package auth.events.user_audit;
+
+option java_package = "com.sap.authkafkastreams.proto.user_audit";
+option java_outer_classname = "UserAuditEventsProto";
+option java_multiple_files = true;
+
+message UserAuditEvent {
+  string event_id = 1;
+  string source_event_id = 2;
+  string user_id = 3;
+  UserAuditAction action = 4;
+  string token_id = 5;
+  int64 occurred_at = 6;
+}
+
+enum UserAuditAction {
+  USER_AUDIT_ACTION_UNSPECIFIED = 0;
+  USER_AUDIT_ACTION_REGISTERED = 1;
+  USER_AUDIT_ACTION_LOGGED_IN = 2;
+  USER_AUDIT_ACTION_LOGGED_OUT = 3;
+}

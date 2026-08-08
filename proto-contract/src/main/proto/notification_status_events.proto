@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package auth.events.notification;
+
+option java_package = "com.sap.authkafkastreams.proto.notification";
+option java_outer_classname = "NotificationStatusEventsProto";
+option java_multiple_files = true;
+
+message NotificationStatusEvent {
+  string event_id = 1;
+  string command_id = 2;
+  string user_id = 3;
+  NotificationDeliveryStatus status = 4;
+  int64 occurred_at = 5;
+  string failure_reason = 6;
+}
+
+enum NotificationDeliveryStatus {
+  NOTIFICATION_DELIVERY_STATUS_UNSPECIFIED = 0;
+  NOTIFICATION_DELIVERY_STATUS_DELIVERED = 1;
+  NOTIFICATION_DELIVERY_STATUS_FAILED = 2;
+}

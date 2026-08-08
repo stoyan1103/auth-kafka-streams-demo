@@ -1,0 +1,374 @@
+openapi: 3.0.3
+
+info:
+  title: Auth Kafka Streams Demo API
+  description: REST API for Spring Security JWT and Kafka Streams demo application.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Auth
+    description: Authentication operations
+  - name: User
+    description: User management operations
+
+paths:
+  /api/v1/auth/register:
+    post:
+      tags:
+        - Auth
+      operationId: registerUser
+      summary: Registers a new user
+      description: Creates a new user account.
+      requestBody:
+        required: true
+        content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterUserRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterUserResponse'
+        '400':
+          description: Invalid registration request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Username or email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Auth
+      operationId: loginUser
+      summary: Logs in a user
+      description: Authenticates a user and returns a JWT access token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUserRequest'
+      responses:
+        '200':
+          description: User successfully authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginUserResponse'
+        '400':
+          description: Invalid login request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid username or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/logout:
+    post:
+      tags:
+        - Auth
+      operationId: logoutUser
+      summary: Logout current user
+      description: Invalidates the currently active JWT token.
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: User successfully logged out
+        '401':
+          description: Missing or invalid JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/users/{id}:
+    get:
+      tags:
+        - User
+      operationId: getUserById
+      summary: Retrieves a user by id
+      description: Returns a user by id. Allowed only for the same user or admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User id
+          schema:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Missing or invalid JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: User is not allowed to access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/users:
+    get:
+      tags:
+        - User
+      operationId: getUsers
+      summary: Get all users
+      description: Returns a list of all users. Allowed only for admins.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number, zero-based
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 1
+        - name: size
+          in: query
+          required: false
+          description: Page size
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            example: 10
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '401':
+          description: Missing or invalid JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: User is not allowed to access this resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RegisterUserRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: stoyan
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          example: stoyan@example.com
+        password:
+          type: string
+          minLength: 8
+          maxLength: 50
+          format: password
+          example: StrongP@ssw0rd123
+
+    RegisterUserResponse:
+      type: object
+      required:
+        - id
+        - username
+        - email
+        - roles
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        username:
+          type: string
+          example: stoyan
+        email:
+          type: string
+          format: email
+          example: stoyan@example.com
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRole'
+        createdAt:
+          type: string
+          format: date-time
+          example: 2024-06-01T12:00:00Z
+
+    LoginUserRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: stoyan
+        password:
+          type: string
+          minLength: 8
+          maxLength: 50
+          format: password
+          example: StrongP@ssw0rd123
+
+    LoginUserResponse:
+      type: object
+      required:
+        - accessToken
+        - tokenType
+        - expirationInSeconds
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+          example: eyJhbGciOiJIUzI1NiIsInR5c...
+        tokenType:
+          type: string
+          example: Bearer
+        expirationInSeconds:
+          type: integer
+          format: int64
+          example: 3600
+
+    UserResponse:
+      type: object
+      required:
+        - id
+        - username
+        - email
+        - roles
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        username:
+          type: string
+          example: stoyan
+        email:
+          type: string
+          format: email
+          example: stoyan@example.com
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRole'
+        createdAt:
+          type: string
+          format: date-time
+          example: 2024-06-01T12:00:00Z
+
+    UserListResponse:
+      type: object
+      required:
+        - users
+        - page
+        - size
+        - totalElements
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResponse'
+        page:
+          type: integer
+          example: 0
+        size:
+          type: integer
+          example: 20
+        totalElements:
+          type: integer
+          format: int64
+          example: 45
+
+    UserRole:
+      type: string
+      enum:
+        - USER
+        - ADMIN
+      example: USER
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: 404
+        message:
+          type: string
+          example: User was not found.
+        details:
+          type: array
+          items:
+            type: string
+            example:
+              - email must be a valid email address
+              - password must be at least 8 characters long
+              - username must be between 2 and 50 characters long

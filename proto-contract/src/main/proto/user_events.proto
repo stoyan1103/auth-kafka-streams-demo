@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package auth.events.user;
+
+option java_package = "com.sap.authkafkastreams.proto.user";
+option java_outer_classname = "UserEventsProto";
+option java_multiple_files = true;
+
+message UserEvent {
+  string event_id = 1;
+  string user_id = 2;
+  int64 occurred_at = 3; // milliseconds
+
+  oneof payload {
+    UserRegistered user_registered = 4;
+  }
+}
+
+message UserRegistered {
+  string username = 1;
+  string email = 2;
+  repeated string roles = 3;
+  int64 registered_at = 4; // milliseconds
+}

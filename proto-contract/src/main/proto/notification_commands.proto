@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package auth.events.notification_commands;
+
+option java_package = "com.sap.authkafkastreams.proto.notification_commands";
+option java_outer_classname = "NotificationCommandsProto";
+option java_multiple_files = true;
+
+message NotificationCommand {
+  string command_id = 1;
+  string source_event_id = 2;
+  string user_id = 3;
+  string token_id = 4;
+  NotificationType notification_type = 5;
+  string message = 6;
+  int64 created_at = 7;
+}
+
+enum NotificationType {
+  NOTIFICATION_TYPE_UNSPECIFIED = 0;
+  NOTIFICATION_TYPE_LOGIN = 1;
+  NOTIFICATION_TYPE_LOGOUT = 2;
+}

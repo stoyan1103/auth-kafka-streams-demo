@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package auth.events.token_session;
+
+option java_package = "com.sap.authkafkastreams.proto.token_session";
+option java_outer_classname = "TokenSessionEventsProto";
+option java_multiple_files = true;
+
+message TokenSessionEvent {
+  string event_id = 1;
+  string user_id = 2;
+  string token_id = 3;
+  int64 occurred_at = 4; // milliseconds
+
+  oneof payload {
+    TokenSessionCreated token_session_created = 5;
+    TokenSessionRevoked token_session_revoked = 6;
+  }
+}
+
+message TokenSessionCreated {
+  int64 expires_at = 1; // epoch milliseconds
+}
+
+message TokenSessionRevoked {
+  TokenSessionRevocationReason reason = 1;
+}
+
+enum TokenSessionRevocationReason {
+  TOKEN_SESSION_REVOCATION_REASON_UNSPECIFIED = 0;
+  TOKEN_SESSION_REVOCATION_REASON_LOGOUT = 1;
+}

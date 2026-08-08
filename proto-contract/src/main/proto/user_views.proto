@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package auth.events.user;
+
+option java_package = "com.sap.authkafkastreams.proto.user";
+option java_outer_classname = "UserViewsProto";
+option java_multiple_files = true;
+
+message UserView {
+  string user_id = 1;
+  string username = 2;
+  string email = 3;
+  repeated string roles = 4;
+  int64 registered_at = 5; // milliseconds
+  int64 updated_at = 6; // milliseconds
+}

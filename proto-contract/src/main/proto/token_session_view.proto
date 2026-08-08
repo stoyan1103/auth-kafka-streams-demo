@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package auth.events.token_session;
+
+option java_package = "com.sap.authkafkastreams.proto.token_session";
+option java_outer_classname = "TokenSessionViewsProto";
+option java_multiple_files = true;
+
+import "token_session_events.proto";
+
+message TokenSessionView {
+  string user_id = 1;
+  string token_id = 2;
+  int64 created_at = 3;
+  int64 expires_at = 4;
+  TokenSessionStatus status = 5;
+  int64 updated_at = 6;
+  TokenSessionRevocationReason revocation_reason = 7;
+}
+
+enum TokenSessionStatus {
+  TOKEN_SESSION_STATUS_UNSPECIFIED = 0;
+  TOKEN_SESSION_STATUS_ACTIVE = 1;
+  TOKEN_SESSION_STATUS_REVOKED = 2;
+}
